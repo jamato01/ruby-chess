@@ -23,6 +23,20 @@ module Chess
       end
 
       # King moves using lookup tables.. also.. castling??????
+      def generate_king_moves(board, color)
+        king = color == WHITE ? board.white_kings : board.black_kings
+
+        moves = []
+
+        attacks = LookupTables::KING_ATTACKS[king] & ~board.pieces(color)
+
+        Bitboard.each_bit(attacks) do |to|
+          moves << Move.new(king, to)
+        end
+
+        # Add castling later
+        moves
+      end
     end
   end
 end
