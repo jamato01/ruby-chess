@@ -1,4 +1,3 @@
-require_relative '../lib/chess'
 require_relative '../lib/bitboard'
 describe Chess::Bitboard do
   describe '#bit(square)' do
