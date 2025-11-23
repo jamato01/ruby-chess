@@ -12,3 +12,5 @@ require_relative "move_generator/leaping"
 require_relative "move_generator/pawns"
 require_relative "move_generator/sliding"
 require_relative "move_generator/legal"
+
+require_relative "utils/lookup_tables"
