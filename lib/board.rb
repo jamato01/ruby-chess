@@ -62,5 +62,79 @@ module Chess
     def all_pieces
       white_pieces | black_pieces
     end
+
+    def piece_at(square)
+      bit = 1 << square
+
+      if white_pawns & bit != 0 then return :pawn
+      elsif white_knights & bit != 0 then return :knight
+      elsif white_bishops & bit != 0 then return :bishop
+      elsif white_rooks & bit != 0 then return :rook
+      elsif white_queens & bit != 0 then return :queen
+      elsif white_kings & bit != 0 then return :king
+      elsif black_pawns & bit != 0 then return :pawn
+      elsif black_knights & bit != 0 then return :knight
+      elsif black_bishops & bit != 0 then return :bishop
+      elsif black_rooks & bit != 0 then return :rook
+      elsif black_queens & bit != 0 then return :queen
+      elsif black_kings & bit != 0 then return :king
+      else
+        nil
+      end
+    end
+
+    def opp(color)
+      color == WHITE ? BLACK : WHITE
+    end
+
+    def add_piece(color, piece, square)
+      bit = 1 << square
+
+      case color
+      when WHITE
+        case piece
+        when :pawn then white_pawns |= bit
+        when :knight then white_knights |= bit
+        when :bishop then white_bishops |= bit
+        when :rook then white_rooks |= bit
+        when :queen then white_queens |= bit
+        when :king then white_kings |= bit
+        end
+      else
+        case piece
+        when :pawn then black_pawns |= bit
+        when :knight then black_knights |= bit
+        when :bishop then black_bishops |= bit
+        when :rook then black_rooks |= bit
+        when :queen then black_queens |= bit
+        when :king then black_kings |= bit
+        end
+      end
+    end
+
+    def remove_piece(color, piece, square)
+      bit = ~(1 << square)
+
+      case color
+      when WHITE
+        case piece
+        when :pawn then white_pawns &= bit
+        when :knight then white_knights &= bit
+        when :bishop then white_bishops &= bit
+        when :rook then white_rooks &= bit
+        when :queen then white_queens &= bit
+        when :king then white_kings &= bit
+        end
+      else
+        case piece
+        when :pawn then black_pawns &= bit
+        when :knight then black_knights &= bit
+        when :bishop then black_bishops &= bit
+        when :rook then black_rooks &= bit
+        when :queen then black_queens &= bit
+        when :king then black_kings &= bit
+        end
+      end
+    end
   end
 end
