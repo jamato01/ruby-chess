@@ -14,7 +14,7 @@ module Chess
         Bitboard.each_bit(single) do |to|
           from = to - 8
 
-          #handle promotions
+          # Handle Promotions
           if to >= 56
             add_promotions(from, to, QUIET, moves)
           else
@@ -36,9 +36,17 @@ module Chess
 
           # Remove attacks on same-color pieces
           attacks &= ~board.white_pieces
+          
+          # Remove attacks that don't have a piece to capture
+          attacks &= board.black_pieces
 
+          # Handle promotions
           Bitboard.each_bit(attacks) do |to|
-            moves << Move.new(from, to, CAPTURE)
+            if to >= 56
+              add_promotions(from, to, CAPTURE, moves)
+            else
+              moves << Move.new(from, to, CAPTURE)
+            end
           end
         end
         moves
@@ -79,8 +87,16 @@ module Chess
           # Remove attacks on same-color pieces
           attacks &= ~board.black_pieces
 
+          # Remove attacks that don't have a piece to capture
+          attacks &= board.white_pieces
+
+          # Handle Promotions
           Bitboard.each_bit(attacks) do |to|
-            moves << Move.new(from, to, CAPTURE)
+            if to >= 56
+              add_promotions(from, to, CAPTURE, moves)
+            else
+              moves << Move.new(from, to, CAPTURE)
+            end
           end
         end
         moves
@@ -89,7 +105,7 @@ module Chess
       def add_promotions(from, to, type, moves)
         # Really not sure how this is gonna work lol
         %i[:queen :rook :bishop :knight].each do |promo|
-          moves << Move.new(from, to, :promotion, promo, type)
+          moves << Move.new(from, to, PROMOTION, promo)
         end
       end
     end
