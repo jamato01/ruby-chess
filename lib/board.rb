@@ -47,6 +47,10 @@ module Chess
       )
     end
 
+    def pieces(color)
+      color == WHITE ? white_pieces : black_pieces
+    end
+
     def white_pieces
       white_pawns | white_knights | white_bishops | white_rooks | white_queens | white_kings
     end
