@@ -4,7 +4,7 @@ module Chess
       def generate_rook_moves(board, color)
         # Checks which color currently in use and sets the blockers rook will stop at
         pieces = color == WHITE ? board.white_rooks : board.black_rooks
-        enemy_pieces = color == BLACK ? board.white_rooks : board.black_rooks
+        enemy_pieces = color == BLACK ? board.white_pieces : board.black_pieces
         blockers = board.all_pieces
 
         moves = []
@@ -32,7 +32,7 @@ module Chess
       def generate_bishop_moves(board, color)
         # Checks which color currently in use and sets the blockers bishop will stop at
         pieces = color == WHITE ? board.white_bishops : board.black_bishops
-        enemy_pieces = color == BLACK ? board.white_rooks : board.black_rooks
+        enemy_pieces = color == BLACK ? board.white_pieces : board.black_pieces
         blockers = board.all_pieces
 
         moves = []
@@ -60,7 +60,7 @@ module Chess
       def generate_queen_moves(board, color)
         # Checks which color currently in use and sets the blockers queens will stop at
         pieces = color == WHITE ? board.white_queens : board.black_queens
-        enemy_pieces = color == BLACK ? board.white_rooks : board.black_rooks
+        enemy_pieces = color == BLACK ? board.white_pieces : board.black_pieces
         blockers = board.all_pieces
 
         moves = []
