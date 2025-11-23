@@ -2,8 +2,8 @@ module Chess
   class Game
     attr_reader :board, :history
 
-    def initialize
-      @board = Board.start_position
+    def initialize(board = Board.start_position)
+      @board = board
       @history = []
     end
 
