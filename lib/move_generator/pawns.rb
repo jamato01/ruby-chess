@@ -102,10 +102,12 @@ module Chess
         moves
       end
 
-      def add_promotions(from, to, type, moves)
-        # Really not sure how this is gonna work lol
+      def add_promotions(from, to, flags, moves)
+        # Add PROMOTION flag
+        flags |= PROMOTION
+        # Add moves for every type of promotion
         %i[:queen :rook :bishop :knight].each do |promo|
-          moves << Move.new(from, to, PROMOTION, promo)
+          moves << Move.new(from, to, flags, promo)
         end
       end
     end
