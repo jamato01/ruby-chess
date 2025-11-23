@@ -4,6 +4,7 @@ module Chess
       def generate_rook_moves(board, color)
         # Checks which color currently in use and sets the blockers rook will stop at
         pieces = color == WHITE ? board.white_rooks : board.black_rooks
+        enemy_pieces = color == BLACK ? board.white_rooks : board.black_rooks
         blockers = board.all_pieces
 
         moves = []
@@ -14,8 +15,13 @@ module Chess
           # Remove attacks on same-color pieces
           attacks &= ~board.pieces(color)
 
+          # Handle capture flags
           Bitboard.each_bit(attacks) do |to|
-            moves << Move.new(from, to)
+            if enemy_pieces & (1 << to) != 0
+              moves << Move.new(from, to, CAPTURE)
+            else
+              moves << Move.new(from, to)
+            end
           end
         end
 
@@ -26,6 +32,7 @@ module Chess
       def generate_bishop_moves(board, color)
         # Checks which color currently in use and sets the blockers bishop will stop at
         pieces = color == WHITE ? board.white_bishops : board.black_bishops
+        enemy_pieces = color == BLACK ? board.white_rooks : board.black_rooks
         blockers = board.all_pieces
 
         moves = []
@@ -36,8 +43,13 @@ module Chess
           # Remove attacks on same-color pieces
           attacks &= ~board.pieces(color)
 
+          # Handle capture flags
           Bitboard.each_bit(attacks) do |to|
-            moves << Move.new(from, to)
+            if enemy_pieces & (1 << to) != 0
+              moves << Move.new(from, to, CAPTURE)
+            else
+              moves << Move.new(from, to)
+            end
           end
         end
 
@@ -48,6 +60,7 @@ module Chess
       def generate_queen_moves(board, color)
         # Checks which color currently in use and sets the blockers queens will stop at
         pieces = color == WHITE ? board.white_queens : board.black_queens
+        enemy_pieces = color == BLACK ? board.white_rooks : board.black_rooks
         blockers = board.all_pieces
 
         moves = []
@@ -59,7 +72,11 @@ module Chess
           attacks &= ~board.pieces(color)
 
           Bitboard.each_bit(attacks) do |to|
-            moves << Move.new(from, to)
+            if enemy_pieces & (1 << to) != 0
+              moves << Move.new(from, to, CAPTURE)
+            else
+              moves << Move.new(from, to)
+            end
           end
         end
 
