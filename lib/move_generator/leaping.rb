@@ -44,7 +44,27 @@ module Chess
           end
         end
 
-        # Add castling later
+        # Add castling
+        if (king & (1 << 4)) != 0
+          if (board.castling_rights & 0b0001) != 0
+            # White Kingside Castle
+            moves << Move.new(4, 6, CASTLE_KINGSIDE)
+          end
+          if (board.castling_rights & 0b0010) != 0
+            # White Queenside Castle
+            moves << Move.new(4, 2, CASTLE_QUEENSIDE)
+          end
+        end
+        if (king & (1 << 60)) != 0
+          if (board.castling_rights & 0b0100) != 0
+            # Black Kingside Castle
+            moves << Move.new(60, 62, CASTLE_KINGSIDE)
+          end
+          if (board.castling_rights & 0b1000) != 0
+            # Black Queenside Castle
+            moves << Move.new(60, 58, CASTLE_KINGSIDE)
+          end
+        end
         moves
       end
     end
