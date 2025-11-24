@@ -2,6 +2,10 @@ module Chess
   module MoveGenerator
     module Pawns
       # Create functionality for pawn pushes, captures, promotions, and en passant
+      def generate_pawn_moves(board, color)
+        color == WHITE ? generate_white_pawn_moves(board) : generate_black_pawn_moves(board)
+      end
+
       def generate_white_pawn_moves(board)
         pawns = board.white_pawns
         empty = ~board.all_pieces
