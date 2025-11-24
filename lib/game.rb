@@ -8,7 +8,7 @@ module Chess
     end
 
     def make_move(move)
-      @history << @board
+      @history << @board.clone
       @board = MoveApplier.apply(@board, move)
     end
   end
