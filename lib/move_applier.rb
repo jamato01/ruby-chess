@@ -18,8 +18,8 @@ module Chess
       end
 
       # Place piece in new square (promote if necessary)
-      if move.promotion?
-        board.add_piece(color, move.promo_piece, to)
+      if move.is_promotion?
+        board.add_piece(color, move.promotion, to)
       else
         board.add_piece(color, piece, to)
       end
@@ -41,6 +41,8 @@ module Chess
       board
     end
 
+    private
+
     def pawn_en_passant_target(color, from, to)
       color == WHITE ? to - 8 : to + 8
     end
@@ -60,7 +62,7 @@ module Chess
     end
 
     def move_rook_for_qs_castling(board, color)
-      if color = WHITE
+      if color == WHITE
         board.remove_piece(WHITE, :rook, 0)
         board.add_piece(WHITE, :rook, 3)
       else
