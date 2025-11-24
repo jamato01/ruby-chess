@@ -136,5 +136,32 @@ module Chess
         end
       end
     end
+
+    def clone
+      Board.new(
+        white_pawns: @white_pawns,
+        white_knights: @white_knights,
+        white_bishops: @white_bishops,
+        white_rooks: @white_rooks,
+        white_queens: @white_queens,
+        white_king: @white_king,
+        black_pawns: @black_pawns,
+        black_knights: @black_knights,
+        black_bishops: @black_bishops,
+        black_rooks: @black_rooks,
+        black_queens: @black_queens,
+        black_king: @black_king,
+        side_to_move: @side_to_move,
+        castling_rights: @castling_rights,
+        en_passant: @en_passant
+      )
+    end
+
+    def in_check?(color)
+      king_bb = (color == WHITE ? white_kings : black_kings)
+      king_sq = Math.log2(king_bb).to_i
+
+      MoveGenerator::Attacks.square_attacked?(self, king_sq, 1 - color)
+    end
   end
 end
