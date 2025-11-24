@@ -9,20 +9,20 @@ module Chess
 
     def initialize(white_pawns:, white_knights:, white_bishops:, white_rooks:, white_queens:, white_kings:, black_pawns:, black_knights:, black_bishops:, black_rooks:, black_queens:, black_kings:, side_to_move:, castling_rights:, en_passant:)
       # initialize bitboards + metadata
-      @white_pawns = white_pawns,
-      @white_knights = white_knights,
-      @white_bishops = white_bishops,
-      @white_rooks = white_rooks,
-      @white_queens = white_queens,
-      @white_kings = white_kings,
-      @black_pawns = black_pawns,
-      @black_knights = black_knights,
-      @black_bishops = black_bishops,
-      @black_rooks = black_rooks,
-      @black_queens = black_queens,
-      @black_kings = black_kings,
-      @side_to_move = side_to_move,
-      @castling_rights = castling_rights,
+      @white_pawns = white_pawns
+      @white_knights = white_knights
+      @white_bishops = white_bishops
+      @white_rooks = white_rooks
+      @white_queens = white_queens
+      @white_kings = white_kings
+      @black_pawns = black_pawns
+      @black_knights = black_knights
+      @black_bishops = black_bishops
+      @black_rooks = black_rooks
+      @black_queens = black_queens
+      @black_kings = black_kings
+      @side_to_move = side_to_move
+      @castling_rights = castling_rights
       @en_passant = en_passant
     end
 
@@ -144,13 +144,13 @@ module Chess
         white_bishops: @white_bishops,
         white_rooks: @white_rooks,
         white_queens: @white_queens,
-        white_king: @white_king,
+        white_kings: @white_kings,
         black_pawns: @black_pawns,
         black_knights: @black_knights,
         black_bishops: @black_bishops,
         black_rooks: @black_rooks,
         black_queens: @black_queens,
-        black_king: @black_king,
+        black_kings: @black_kings,
         side_to_move: @side_to_move,
         castling_rights: @castling_rights,
         en_passant: @en_passant
