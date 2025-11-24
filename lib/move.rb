@@ -9,6 +9,10 @@ module Chess
       @promotion = promotion
     end
 
+    def is_promotion?
+      !promotion.nil?
+    end
+
     def capture?
       flags & CAPTURE != 0
     end
