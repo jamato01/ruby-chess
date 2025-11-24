@@ -25,7 +25,7 @@ module Chess
       end
 
       # Special moves
-      case move.type
+      case move.flags
       when DOUBLE_PAWN
         board.en_passant_square = pawn_en_passant_target(color, from, to)
       when EN_PASSANT
