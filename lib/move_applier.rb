@@ -38,6 +38,17 @@ module Chess
         move_rook_for_qs_castling(board, color)
       end
 
+      # Halfmove clock (for 50-move rule): reset on pawn move or capture, otherwise increment
+      if move.capture? || piece == :pawn || move.is_promotion?
+        board.halfmove_clock = 0
+      else
+        board.halfmove_clock = (board.halfmove_clock || 0) + 1
+      end
+
+      # Only the immediate opponent move can capture en-passant; clear the en_passant
+      # square after the next move if not a double pawn push.
+      board.en_passant = nil if move.flags != DOUBLE_PAWN
+
       board.side_to_move = board.opp(color)
       board
     end

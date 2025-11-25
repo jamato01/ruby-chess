@@ -4,9 +4,9 @@ module Chess
       :white_pawns, :white_knights, :white_bishops, :white_rooks, :white_queens, :white_kings,
       :black_pawns, :black_knights, :black_bishops, :black_rooks, :black_queens, :black_kings
 
-    attr_accessor :side_to_move, :castling_rights, :en_passant
+    attr_accessor :side_to_move, :castling_rights, :en_passant, :halfmove_clock
 
-    def initialize(white_pawns:, white_knights:, white_bishops:, white_rooks:, white_queens:, white_kings:, black_pawns:, black_knights:, black_bishops:, black_rooks:, black_queens:, black_kings:, side_to_move:, castling_rights:, en_passant:)
+  def initialize(white_pawns:, white_knights:, white_bishops:, white_rooks:, white_queens:, white_kings:, black_pawns:, black_knights:, black_bishops:, black_rooks:, black_queens:, black_kings:, side_to_move:, castling_rights:, en_passant:, halfmove_clock: 0)
       # initialize bitboards + metadata
       @white_pawns = white_pawns
       @white_knights = white_knights
@@ -23,6 +23,7 @@ module Chess
       @side_to_move = side_to_move
       @castling_rights = castling_rights
       @en_passant = en_passant
+      @halfmove_clock = halfmove_clock
     end
 
     def self.start_position
@@ -42,7 +43,8 @@ module Chess
         black_kings:   0x1000000000000000,
         side_to_move: Chess::WHITE,
         castling_rights: 0b1111,
-        en_passant: nil
+        en_passant: nil,
+        halfmove_clock: 0
       )
     end
 
@@ -152,7 +154,8 @@ module Chess
         black_kings: @black_kings,
         side_to_move: @side_to_move,
         castling_rights: @castling_rights,
-        en_passant: @en_passant
+        en_passant: @en_passant,
+        halfmove_clock: @halfmove_clock
       )
     end
 
