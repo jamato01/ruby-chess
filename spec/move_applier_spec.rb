@@ -1,7 +1,7 @@
 require_relative '../lib/chess'
 
 describe Chess::MoveApplier do
-  describe '.apply' do
+  describe '#apply' do
     it 'moves a pawn from e2 to e4 without capture' do
       board = Chess::Board.start_position
 
