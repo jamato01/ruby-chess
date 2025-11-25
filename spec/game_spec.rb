@@ -17,7 +17,8 @@ describe Chess::Game do
     end
     it 'stores previous board in history' do
       game.make_move(move)
-      expect(game.history).to eq([initial_board])
+      expect(game.history.length).to eq(1)
+      expect(game.history.first).not_to be(initial_board)
     end
 
     it 'updates board with result of MoveApplier.apply' do
