@@ -1,11 +1,10 @@
 module Chess
   class Board
     attr_reader \
-      :side_to_move,
-      :castling_rights,
-      :en_passant,
       :white_pawns, :white_knights, :white_bishops, :white_rooks, :white_queens, :white_kings,
       :black_pawns, :black_knights, :black_bishops, :black_rooks, :black_queens, :black_kings
+
+    attr_accessor :side_to_move, :castling_rights, :en_passant
 
     def initialize(white_pawns:, white_knights:, white_bishops:, white_rooks:, white_queens:, white_kings:, black_pawns:, black_knights:, black_bishops:, black_rooks:, black_queens:, black_kings:, side_to_move:, castling_rights:, en_passant:)
       # initialize bitboards + metadata
@@ -38,7 +37,7 @@ module Chess
         black_pawns:   0x00FF000000000000,
         black_knights: 0x4200000000000000,
         black_bishops: 0x2400000000000000,
-        black_rooks:   0x0800000000000000,
+        black_rooks:   0x8100000000000000,
         black_queens:  0x0800000000000000,
         black_kings:   0x1000000000000000,
         side_to_move: Chess::WHITE,
@@ -93,21 +92,21 @@ module Chess
       case color
       when WHITE
         case piece
-        when :pawn then white_pawns |= bit
-        when :knight then white_knights |= bit
-        when :bishop then white_bishops |= bit
-        when :rook then white_rooks |= bit
-        when :queen then white_queens |= bit
-        when :king then white_kings |= bit
+        when :pawn then @white_pawns |= bit
+        when :knight then @white_knights |= bit
+        when :bishop then @white_bishops |= bit
+        when :rook then @white_rooks |= bit
+        when :queen then @white_queens |= bit
+        when :king then @white_kings |= bit
         end
       else
         case piece
-        when :pawn then black_pawns |= bit
-        when :knight then black_knights |= bit
-        when :bishop then black_bishops |= bit
-        when :rook then black_rooks |= bit
-        when :queen then black_queens |= bit
-        when :king then black_kings |= bit
+        when :pawn then @black_pawns |= bit
+        when :knight then @black_knights |= bit
+        when :bishop then @black_bishops |= bit
+        when :rook then @black_rooks |= bit
+        when :queen then @black_queens |= bit
+        when :king then @black_kings |= bit
         end
       end
     end
@@ -118,21 +117,21 @@ module Chess
       case color
       when WHITE
         case piece
-        when :pawn then white_pawns &= bit
-        when :knight then white_knights &= bit
-        when :bishop then white_bishops &= bit
-        when :rook then white_rooks &= bit
-        when :queen then white_queens &= bit
-        when :king then white_kings &= bit
+        when :pawn then @white_pawns &= bit
+        when :knight then @white_knights &= bit
+        when :bishop then @white_bishops &= bit
+        when :rook then @white_rooks &= bit
+        when :queen then @white_queens &= bit
+        when :king then @white_kings &= bit
         end
       else
         case piece
-        when :pawn then black_pawns &= bit
-        when :knight then black_knights &= bit
-        when :bishop then black_bishops &= bit
-        when :rook then black_rooks &= bit
-        when :queen then black_queens &= bit
-        when :king then black_kings &= bit
+        when :pawn then @black_pawns &= bit
+        when :knight then @black_knights &= bit
+        when :bishop then @black_bishops &= bit
+        when :rook then @black_rooks &= bit
+        when :queen then @black_queens &= bit
+        when :king then @black_kings &= bit
         end
       end
     end
