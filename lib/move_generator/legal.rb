@@ -23,16 +23,14 @@ module Chess
         legal_moves
       end
 
-      private
-
-      def generate_pseudo_legal(board, color)
+      def self.generate_pseudo_legal(board, color)
         moves = []
-        moves.concat generate_pawn_moves(board, color)
-        moves.concat generate_rook_moves(board, color)
-        moves.concat generate_bishop_moves(board, color)
-        moves.concat generate_queen_moves(board, color)
-        moves.concat generate_knight_moves(board, color)
-        moves.concat generate_king_moves(board, color)
+        moves.concat Pawns.generate_pawn_moves(board, color)
+        moves.concat Sliding.generate_rook_moves(board, color)
+        moves.concat Sliding.generate_bishop_moves(board, color)
+        moves.concat Sliding.generate_queen_moves(board, color)
+        moves.concat Leaping.generate_knight_moves(board, color)
+        moves.concat Leaping.generate_king_moves(board, color)
         moves
       end
     end
