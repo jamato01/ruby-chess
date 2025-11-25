@@ -89,6 +89,22 @@ describe Chess::MoveGenerator::Sliding do
       expect(moves.any? { |m| m.from == 27 && m.to == 48 }).to be false
       expect(moves.any? { |m| m.from == 27 && m.to == 20 }).to be false
     end
+
+    it 'can capture an enemy piece on its diagonal' do
+      board = make_board_with_bishop(27)
+      board.add_piece(Chess::BLACK, :rook, 41) # enemy on b6
+      moves = Chess::MoveGenerator::Sliding.generate_bishop_moves(board, Chess::WHITE)
+      expect(moves.any? { |m| m.from == 27 && m.to == 41 && (m.flags & Chess::CAPTURE) != 0 }).to be true
+    end
+
+    it 'generates moves to board edges from corner' do
+      board = make_board_with_bishop(0) # a1
+      moves = Chess::MoveGenerator::Sliding.generate_bishop_moves(board, Chess::WHITE)
+      # a1 diagonal squares include b2 (9), c3 (18), d4 (27)
+      expect(moves.any? { |m| m.from == 0 && m.to == 9 }).to be true
+      expect(moves.any? { |m| m.from == 0 && m.to == 18 }).to be true
+      expect(moves.any? { |m| m.from == 0 && m.to == 27 }).to be true
+    end
   end
 
   context 'Queen moves' do
