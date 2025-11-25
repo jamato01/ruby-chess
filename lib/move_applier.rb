@@ -27,7 +27,8 @@ module Chess
       # Special moves
       case move.flags
       when DOUBLE_PAWN
-        board.en_passant_square = pawn_en_passant_target(color, from, to)
+        # set en_passant target square on board
+        board.en_passant = pawn_en_passant_target(color, from, to)
       when EN_PASSANT
         captured = en_passant_capture_square(color, to)
         board.remove_piece(board.opp(color), :pawn, captured)
@@ -41,17 +42,15 @@ module Chess
       board
     end
 
-    private
-
-    def pawn_en_passant_target(color, from, to)
+    def self.pawn_en_passant_target(color, from, to)
       color == WHITE ? to - 8 : to + 8
     end
 
-    def en_passant_capture_square(color, to)
+    def self.en_passant_capture_square(color, to)
       color == WHITE ? to - 8 : to + 8
     end
 
-    def move_rook_for_ks_castling(board, color)
+    def self.move_rook_for_ks_castling(board, color)
       if color == WHITE
         board.remove_piece(WHITE, :rook, 7)
         board.add_piece(WHITE, :rook, 5)
@@ -61,7 +60,7 @@ module Chess
       end
     end
 
-    def move_rook_for_qs_castling(board, color)
+    def self.move_rook_for_qs_castling(board, color)
       if color == WHITE
         board.remove_piece(WHITE, :rook, 0)
         board.add_piece(WHITE, :rook, 3)
