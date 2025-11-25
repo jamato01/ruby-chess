@@ -18,9 +18,9 @@ module Chess
           # Handle capture flags
           Bitboard.each_bit(attacks) do |to|
             if enemy_pieces & (1 << to) != 0
-              moves << Move.new(from, to, CAPTURE)
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
             else
-              moves << Move.new(from, to)
+              moves << Move.new(from: from, to: to)
             end
           end
         end
@@ -46,9 +46,9 @@ module Chess
           # Handle capture flags
           Bitboard.each_bit(attacks) do |to|
             if enemy_pieces & (1 << to) != 0
-              moves << Move.new(from, to, CAPTURE)
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
             else
-              moves << Move.new(from, to)
+              moves << Move.new(from: from, to: to)
             end
           end
         end
@@ -73,9 +73,9 @@ module Chess
 
           Bitboard.each_bit(attacks) do |to|
             if enemy_pieces & (1 << to) != 0
-              moves << Move.new(from, to, CAPTURE)
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
             else
-              moves << Move.new(from, to)
+              moves << Move.new(from: from, to: to)
             end
           end
         end
@@ -83,6 +83,9 @@ module Chess
         # All possible queen moves:
         moves
       end
+
+      # expose module-level methods
+      module_function :generate_rook_moves, :generate_bishop_moves, :generate_queen_moves
     end
   end
 end

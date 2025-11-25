@@ -16,9 +16,9 @@ module Chess
 
           Bitboard.each_bit(attacks) do |to|
             if enemy_pieces & (1 << to) != 0
-              moves << Move.new(from, to, CAPTURE)
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
             else
-              moves << Move.new(from, to)
+              moves << Move.new(from: from, to: to)
             end
           end
         end
@@ -34,13 +34,16 @@ module Chess
 
         moves = []
 
-        attacks = LookupTables::KING_ATTACKS[king] & ~board.pieces(color)
+        # For each king (should be only one), generate attacks from its square
+        Bitboard.each_bit(king) do |from|
+          attacks = LookupTables::KING_ATTACKS[from] & ~board.pieces(color)
 
-        Bitboard.each_bit(attacks) do |to|
-          if enemy_pieces & (1 << to) != 0
-            moves << Move.new(from, to, CAPTURE)
-          else
-            moves << Move.new(from, to)
+          Bitboard.each_bit(attacks) do |to|
+            if enemy_pieces & (1 << to) != 0
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
+            else
+              moves << Move.new(from: from, to: to)
+            end
           end
         end
 
@@ -48,25 +51,27 @@ module Chess
         if (king & (1 << 4)) != 0
           if (board.castling_rights & 0b0001) != 0
             # White Kingside Castle
-            moves << Move.new(4, 6, CASTLE_KINGSIDE)
+            moves << Move.new(from: 4, to: 6, flags: CASTLE_KINGSIDE)
           end
           if (board.castling_rights & 0b0010) != 0
             # White Queenside Castle
-            moves << Move.new(4, 2, CASTLE_QUEENSIDE)
+            moves << Move.new(from: 4, to: 2, flags: CASTLE_QUEENSIDE)
           end
         end
         if (king & (1 << 60)) != 0
           if (board.castling_rights & 0b0100) != 0
             # Black Kingside Castle
-            moves << Move.new(60, 62, CASTLE_KINGSIDE)
+            moves << Move.new(from: 60, to: 62, flags: CASTLE_KINGSIDE)
           end
           if (board.castling_rights & 0b1000) != 0
             # Black Queenside Castle
-            moves << Move.new(60, 58, CASTLE_KINGSIDE)
+            moves << Move.new(from: 60, to: 58, flags: CASTLE_KINGSIDE)
           end
         end
         moves
       end
+      
+      module_function :generate_knight_moves, :generate_king_moves
     end
   end
 end

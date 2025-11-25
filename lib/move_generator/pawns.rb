@@ -22,7 +22,7 @@ module Chess
           if to >= 56
             add_promotions(from, to, QUIET, moves)
           else
-            moves << Move.new(from, to)
+            moves << Move.new(from: from, to: to)
           end
         end
 
@@ -31,7 +31,7 @@ module Chess
 
         Bitboard.each_bit(double) do |to|
           from = to - 16
-          moves << Move.new(from, to, DOUBLE_PAWN)
+          moves << Move.new(from: from, to: to, flags: DOUBLE_PAWN)
         end
 
         # Attacks
@@ -49,7 +49,7 @@ module Chess
             if to >= 56
               add_promotions(from, to, CAPTURE, moves)
             else
-              moves << Move.new(from, to, CAPTURE)
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
             end
           end
         end
@@ -72,7 +72,7 @@ module Chess
           if to < 8
             add_promotions(from, to, QUIET, moves)
           else
-            moves << Move.new(from, to)
+            moves << Move.new(from: from, to: to)
           end
         end
 
@@ -81,7 +81,7 @@ module Chess
 
         Bitboard.each_bit(double) do |to|
           from = to + 16
-          moves << Move.new(from, to, DOUBLE_PAWN)
+          moves << Move.new(from: from, to: to, flags: DOUBLE_PAWN)
         end
 
         # Attacks
@@ -99,7 +99,7 @@ module Chess
             if to >= 56
               add_promotions(from, to, CAPTURE, moves)
             else
-              moves << Move.new(from, to, CAPTURE)
+              moves << Move.new(from: from, to: to, flags: CAPTURE)
             end
           end
         end
@@ -110,10 +110,13 @@ module Chess
         # Add PROMOTION flag
         flags |= PROMOTION
         # Add moves for every type of promotion
-        %i[:queen :rook :bishop :knight].each do |promo|
-          moves << Move.new(from, to, flags, promo)
+        [:queen, :rook, :bishop, :knight].each do |promo|
+          moves << Move.new(from: from, to: to, flags: flags, promotion: promo)
         end
       end
+
+      # Make module functions so that they can be called as class functions
+      module_function :generate_pawn_moves, :generate_white_pawn_moves, :generate_black_pawn_moves, :add_promotions
     end
   end
 end
