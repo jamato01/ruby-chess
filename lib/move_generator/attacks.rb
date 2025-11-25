@@ -53,15 +53,19 @@ module Chess
         rook_attacks(square, blockers) | bishop_attacks(square, blockers)
       end
 
+      # Expose these as module functions so callers can invoke Attacks.rook_attacks(...)
+      module_function :rook_attacks, :bishop_attacks, :queen_attacks
+
       def self.square_attacked?(board, square, by_color)
         return true if pawn_attacks_square?(board, square, by_color)
         return true if knight_attacks_square?(board, square, by_color)
         return true if king_attacks_square?(board, square, by_color)
         return true if sliding_attacks_square?(board, square, by_color)
+        false
       end
 
       def self.pawn_attacks_square?(board, square, by_color)
-        pawn_attacks = by_color == WHITE ? WHITE_PAWN_ATTACKS[square] : BLACK_PAWN_ATTACKS[square]
+        pawn_attacks = by_color == WHITE ? LookupTables::WHITE_PAWN_ATTACKS[square] : LookupTables::BLACK_PAWN_ATTACKS[square]
         pawn_bb = by_color == WHITE ? board.white_pawns : board.black_pawns
         (pawn_attacks & pawn_bb) != 0
       end
@@ -69,26 +73,26 @@ module Chess
 
       def self.knight_attacks_square?(board, square, by_color)
         knight_bb = by_color == WHITE ? board.white_knights : board.black_knights
-        (KNIGHT_ATTACKS[square] & knight_bb) != 0
+        (LookupTables::KNIGHT_ATTACKS[square] & knight_bb) != 0
       end
 
       def self.king_attacks_square?(board, square, by_color)
         king_bb = by_color == WHITE ? board.white_kings : board.black_kings
-        (KING_ATTACKS[square] & king_bb) != 0
+        (LookupTables::KING_ATTACKS[square] & king_bb) != 0
       end
 
       def self.sliding_attacks_square?(board, square, by_color)
         blockers = board.all_pieces
         target_mask = 1 << square
         # Bishop and Queen check
-        bishop_like = (color == WHITE ? 
-                      (board.white_bishops | board.white_queens) : 
-                      (board.black_bishops | board.black_queens))
+  bishop_like = (by_color == WHITE ? 
+          (board.white_bishops | board.white_queens) : 
+          (board.black_bishops | board.black_queens))
 
         # Rook and Queen check
-        rook_like   = (color == WHITE ?
-                      (board.white_rooks | board.white_queens) :
-                      (board.black_rooks | board.black_queens))
+  rook_like   = (by_color == WHITE ?
+          (board.white_rooks | board.white_queens) :
+          (board.black_rooks | board.black_queens))
 
         Bitboard.each_bit(bishop_like) do |from|
           attacks = bishop_attacks(from, blockers)
