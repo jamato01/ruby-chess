@@ -40,17 +40,23 @@ module Chess
 
           # Remove attacks on same-color pieces
           attacks &= ~board.white_pieces
-          
-          # Remove attacks that don't have a piece to capture
-          attacks &= board.black_pieces
 
-          # Handle promotions
-          Bitboard.each_bit(attacks) do |to|
+          # Capture attacks (squares occupied by enemy pieces)
+          capture_attacks = attacks & board.black_pieces
+
+          # Handle promotions on captures
+          Bitboard.each_bit(capture_attacks) do |to|
             if to >= 56
               add_promotions(from, to, CAPTURE, moves)
             else
               moves << Move.new(from: from, to: to, flags: CAPTURE)
             end
+          end
+
+          # En-passant capture: if en_passant square exists and this pawn can attack it,
+          # add an en-passant capture move (captures the pawn that double-pushed)
+          if board.en_passant && (attacks & (1 << board.en_passant)) != 0
+            moves << Move.new(from: from, to: board.en_passant, flags: EN_PASSANT | CAPTURE)
           end
         end
         moves
@@ -91,16 +97,21 @@ module Chess
           # Remove attacks on same-color pieces
           attacks &= ~board.black_pieces
 
-          # Remove attacks that don't have a piece to capture
-          attacks &= board.white_pieces
+          # Capture attacks (squares occupied by enemy pieces)
+          capture_attacks = attacks & board.white_pieces
 
-          # Handle Promotions
-          Bitboard.each_bit(attacks) do |to|
+          # Handle promotions on captures
+          Bitboard.each_bit(capture_attacks) do |to|
             if to >= 56
               add_promotions(from, to, CAPTURE, moves)
             else
               moves << Move.new(from: from, to: to, flags: CAPTURE)
             end
+          end
+
+          # En-passant capture for black pawns
+          if board.en_passant && (attacks & (1 << board.en_passant)) != 0
+            moves << Move.new(from: from, to: board.en_passant, flags: EN_PASSANT | CAPTURE)
           end
         end
         moves
