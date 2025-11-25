@@ -76,4 +76,16 @@ describe Chess::MoveGenerator::Sliding do
     expect(moves.any? { |m| m.from == 27 && m.to == 54 }).to be true
     expect(moves.any? { |m| m.from == 27 && m.to == 6 }).to be true
   end
+
+  it 'generates diagonal bishop moves with blockers' do
+      board = make_board_with_bishop(27)
+      # Black Rook on b6 (41), White Rook on e3 (20)
+      board.add_piece(Chess::BLACK, :rook, 41)
+      board.add_piece(Chess::WHITE, :rook, 20)
+    moves = Chess::MoveGenerator::Sliding.generate_bishop_moves(board, Chess::WHITE)
+      # expect b6 (41) to be reachable, but a7 (48) and e3 (20) to not be reachable
+      expect(moves.any? { |m| m.from == 27 && m.to == 41 }).to be true
+      expect(moves.any? { |m| m.from == 27 && m.to == 48 }).to be false
+      expect(moves.any? { |m| m.from == 27 && m.to == 20 }).to be false
+    end
 end
