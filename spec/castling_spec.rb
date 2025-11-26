@@ -121,3 +121,54 @@ describe 'Castling move application' do
     expect((result.black_rooks & (1 << 59)) != 0).to be true
   end
 end
+
+describe 'Castling rights clearing' do
+  it 'clears both white castling rights when the white king moves' do
+    board = Chess::Board.start_position
+    # King e1 -> e2
+    move = Chess::Move.new(from: 4, to: 12)
+    result = Chess::MoveApplier.apply(board, move)
+
+    # white castling bits are the low two bits (0b0011)
+    expect((result.castling_rights & 0b0011)).to eq(0)
+  end
+
+  it 'clears the appropriate white castling right when a rook moves' do
+    board = Chess::Board.start_position
+    # Move white kingside rook h1 -> h2 (7 -> 15)
+    move = Chess::Move.new(from: 7, to: 15)
+    result = Chess::MoveApplier.apply(board, move)
+
+    # white kingside bit (0b0001) should be cleared
+    expect((result.castling_rights & 0b0001)).to eq(0)
+    # white queenside bit may remain
+    expect((result.castling_rights & 0b0010)).to_not eq(0)
+  end
+
+  it 'clears white castling right when white rook is captured on its original square' do
+    # Place a white rook on h1 (7) and a black rook poised to capture it from h3 (23)
+    board = Chess::Board.new(
+      white_pawns: 0,
+      white_knights: 0,
+      white_bishops: 0,
+      white_rooks: 1 << 7,
+      white_queens: 0,
+      white_kings: 1 << 4,
+      black_pawns: 0,
+      black_knights: 0,
+      black_bishops: 0,
+      black_rooks: 1 << 23,
+      black_queens: 0,
+      black_kings: 0,
+      side_to_move: Chess::BLACK,
+      castling_rights: 0b0001,
+      en_passant: nil
+    )
+
+    # Black captures h1
+    move = Chess::Move.new(from: 23, to: 7, flags: Chess::CAPTURE)
+    result = Chess::MoveApplier.apply(board, move)
+
+    expect((result.castling_rights & 0b0001)).to eq(0)
+  end
+end
