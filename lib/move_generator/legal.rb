@@ -13,12 +13,34 @@ module Chess
         legal_moves = []
         
         moves.each do |move|
-          # Need to test the move on a cloned board
-          temp_board = board.clone
-          MoveApplier.apply(temp_board, move)
+            # Pre-check: castling cannot be done if king is in check or if any square
+            # the king traverses is attacked. Check those first to avoid allowing
+            # castling through check.
+            opp = board.opp(color)
+            if (move.flags & CASTLE_KINGSIDE) != 0
+              # White crosses f1(5) -> g1(6), Black crosses f8(61) -> g8(62)
+              cross_sq = color == WHITE ? 5 : 61
+              dest_sq = move.to
+              next if board.in_check?(color)
+              next if MoveGenerator::Attacks.square_attacked?(board, cross_sq, opp)
+              next if MoveGenerator::Attacks.square_attacked?(board, dest_sq, opp)
+            end
 
-          # If king isn't in check, the move is legal and we can keep it
-          legal_moves << move unless temp_board.in_check?(color)
+            if (move.flags & CASTLE_QUEENSIDE) != 0
+              # White crosses d1(3) -> c1(2), Black crosses d8(59) -> c8(58)
+              cross_sq = color == WHITE ? 3 : 59
+              dest_sq = move.to
+              next if board.in_check?(color)
+              next if MoveGenerator::Attacks.square_attacked?(board, cross_sq, opp)
+              next if MoveGenerator::Attacks.square_attacked?(board, dest_sq, opp)
+            end
+
+            # Need to test the move on a cloned board
+            temp_board = board.clone
+            MoveApplier.apply(temp_board, move)
+
+            # If king isn't in check after the move, the move is legal and we can keep it
+            legal_moves << move unless temp_board.in_check?(color)
         end
         legal_moves
       end
