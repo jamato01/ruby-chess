@@ -4,6 +4,7 @@ module Chess
   module GUI
     class Ruby2DRenderer
       DEFAULT_SQUARE = 64
+      LABEL_MARGIN = 28
 
       WHITE_PIECES = {
         pawn: "♙", knight: "♘", bishop: "♗", rook: "♖", queen: "♕", king: "♔"
@@ -21,12 +22,15 @@ module Chess
         @highlights = []
         @rects = {}
         @piece_texts = {}
+        @labels = []
+        @board_x = LABEL_MARGIN
+        @board_y = 0
       end
 
       def start
         raise "ruby2d gem not available. Please install 'ruby2d' to run GUI." unless defined?(Ruby2D)
 
-        Window.set(title: "Ruby Chess", width: @square * 8, height: @square * 8 + 40)
+        Window.set(title: "Ruby Chess", width: @square * 8 + @board_x + 8, height: @square * 8 + LABEL_MARGIN + 40)
 
         draw_board
         draw_pieces
@@ -44,17 +48,21 @@ module Chess
       end
 
       def draw_board
-        # Draw squares
+        # Draw squares with board offset so labels can live outside
+        # clear previous squares
+        @rects.values.each(&:remove) if @rects && !@rects.empty?
+        @rects = {}
         (0..7).each do |rank|
           (0..7).each do |file|
-            x = file * @square
-            y = rank * @square
+            x = @board_x + file * @square
+            y = @board_y + rank * @square
             color = (file + (7 - rank)).even? ? 'white' : 'purple'
             rect = Rectangle.new(x: x, y: y, width: @square, height: @square, color: color)
             sq = (7 - rank) * 8 + file
             @rects[sq] = rect
           end
         end
+        draw_labels
       end
 
       def draw_pieces
@@ -71,8 +79,8 @@ module Chess
 
           file = sq % 8
           rank = sq / 8
-          x = file * @square + (@square * 0.15)
-          y = (7 - rank) * @square + (@square * 0.05)
+          x = @board_x + file * @square + (@square * 0.15)
+          y = @board_y + (7 - rank) * @square + (@square * 0.05)
 
           txt = Text.new(glyph, x: x, y: y, size: (@square * 0.8).to_i, color: 'black')
           @piece_texts[sq] = txt
@@ -89,14 +97,16 @@ module Chess
           in_check = @board.in_check?(@board.side_to_move) ? ' (in check)' : ''
           msg = "#{side} to move#{in_check}"
         end
-        @status_text = Text.new(msg, x: 10, y: @square * 8 + 8, size: 16, color: 'white')
+        @status_text = Text.new(msg, x: 10, y: @square * 8 + LABEL_MARGIN + 8, size: 16, color: 'white')
       end
 
       def handle_click(x, y)
-        return if y > @square * 8 # click in status area
+        # click in status area or outside board horizontally
+        return if y > @board_y + @square * 8
+        return if x < @board_x || x > (@board_x + @square * 8)
 
-        file = (x / @square).to_i
-        rank = 7 - (y / @square).to_i
+        file = ((x - @board_x) / @square).to_i
+        rank = 7 - ((y - @board_y) / @square).to_i
         sq = rank * 8 + file
 
         if @selected.nil?
@@ -132,6 +142,7 @@ module Chess
       end
 
       def refresh_screen
+        draw_board
         draw_pieces
         draw_status
         update_highlights
@@ -159,6 +170,41 @@ module Chess
           next unless rect
           hl = Rectangle.new(x: rect.x, y: rect.y, width: rect.width, height: rect.height, color: [0, 1, 0, 0.25])
           @highlights << hl
+        end
+      end
+
+      def draw_labels
+        # remove previous labels
+        @labels.each do |entry|
+          entry[:rect]&.remove
+          entry[:text]&.remove
+        end
+        @labels = []
+
+        # Files (a-h) along the bottom outside the board
+        (0..7).each do |file|
+          ch = ("a".ord + file).chr
+          cx = @board_x + file * @square + (@square / 2)
+          cy = @board_y + @square * 8 + 4
+          bw = (@square * 0.6).to_i
+          bh = 20
+          bx = cx - (bw / 2)
+          by = cy
+          rect = Rectangle.new(x: bx, y: by, width: bw, height: bh, color: [0, 0, 0, 0.7])
+          txt = Text.new(ch, x: cx - 6, y: by + 2, size: 14, color: 'white')
+          @labels << { rect: rect, text: txt }
+        end
+
+        # Ranks (1-8) along the left outside the board
+        (0..7).each do |r|
+          label = (8 - r).to_s
+          cx = 6
+          cy = @board_y + r * @square + (@square / 2)
+          bw = 20
+          bh = 20
+          rect = Rectangle.new(x: 2, y: cy - (bh / 2), width: bw, height: bh, color: [0, 0, 0, 0.7])
+          txt = Text.new(label, x: cx, y: cy - 8, size: 14, color: 'white')
+          @labels << { rect: rect, text: txt }
         end
       end
 
