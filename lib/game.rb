@@ -26,5 +26,25 @@ module Chess
       moves = MoveGenerator::Legal.generate(@board)
       moves.empty?
     end
+
+    # Stalemate: side to move is not in check but has no legal moves
+    def stalemate?
+      color = @board.side_to_move
+      return false if @board.in_check?(color)
+      moves = MoveGenerator::Legal.generate(@board)
+      moves.empty?
+    end
+
+    # Game over if checkmate, stalemate, or fifty-move draw
+    def over?
+      checkmate? || stalemate? || fifty_move_draw?
+    end
+
+    # Returns winner color (WHITE/BLACK) if checkmate, nil for stalemate or draw
+    def winner
+      return nil if stalemate? || fifty_move_draw?
+      return (@board.side_to_move == WHITE ? BLACK : WHITE) if checkmate?
+      nil
+    end
   end
 end
