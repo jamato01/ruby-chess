@@ -70,3 +70,64 @@ describe 'En Passant move generation' do
     expect(moves.any? { |m| m.from == 36 && m.to == 43 && (m.flags & Chess::EN_PASSANT) != 0 }).to be true
   end
 end
+
+describe 'Legal en-passant generation and edge cases' do
+  it 'includes en-passant in legal moves when it does not expose the king to check' do
+    # White pawn on e5 (36), black pawn on d7 (51) double-push to d5 (35)
+    board = Chess::Board.new(
+      white_pawns: 1 << 36,
+      white_knights: 0,
+      white_bishops: 0,
+      white_rooks: 0,
+      white_queens: 0,
+      white_kings: 1 << 4,
+      black_pawns: 1 << 51,
+      black_knights: 0,
+      black_bishops: 0,
+      black_rooks: 0,
+      black_queens: 0,
+      black_kings: 0,
+      side_to_move: Chess::BLACK,
+      castling_rights: 0,
+      en_passant: nil
+    )
+
+    # Black double pawn push d7 -> d5 (51 -> 35)
+    double_move = Chess::Move.new(from: 51, to: 35, flags: Chess::DOUBLE_PAWN)
+    after = Chess::MoveApplier.apply(board, double_move)
+
+    # Now white legal moves should include en-passant capture from e5 (36) to d6 (43)
+    legal_moves = Chess::MoveGenerator::Legal.generate(after)
+    expect(legal_moves.any? { |m| m.from == 36 && m.to == 43 && (m.flags & Chess::EN_PASSANT) != 0 }).to be true
+  end
+
+  it 'does not include an en-passant move that would leave the king in check' do
+    # En-passant that is pseudo-legal but should check the king (pinned pawn)
+    board = Chess::Board.new(
+      white_pawns: (1 << 0),
+      white_knights: 0,
+      white_bishops: 0,
+      white_rooks: 0,
+      white_queens: 0,
+      white_kings: 1 << 2,
+      black_pawns: 1 << 17,
+      black_knights: 0,
+      black_bishops: 0,
+      black_rooks: 1 << 3,
+      black_queens: 0,
+      black_kings: 0,
+      side_to_move: Chess::BLACK,
+      castling_rights: 0,
+      en_passant: nil
+    )
+
+    # Black double push 17 -> 1
+    double_move = Chess::Move.new(from: 17, to: 1, flags: Chess::DOUBLE_PAWN)
+    after = Chess::MoveApplier.apply(board, double_move)
+
+    legal_moves = Chess::MoveGenerator::Legal.generate(after)
+    ep_move_present = legal_moves.any? { |m| m.from == 0 && m.to == 9 && (m.flags & Chess::EN_PASSANT) != 0 }
+
+    expect(ep_move_present).to be false
+  end
+end
