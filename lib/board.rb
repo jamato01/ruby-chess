@@ -6,7 +6,7 @@ module Chess
 
     attr_accessor :side_to_move, :castling_rights, :en_passant, :halfmove_clock
 
-  def initialize(white_pawns:, white_knights:, white_bishops:, white_rooks:, white_queens:, white_kings:, black_pawns:, black_knights:, black_bishops:, black_rooks:, black_queens:, black_kings:, side_to_move:, castling_rights:, en_passant:, halfmove_clock: 0)
+    def initialize(white_pawns:, white_knights:, white_bishops:, white_rooks:, white_queens:, white_kings:, black_pawns:, black_knights:, black_bishops:, black_rooks:, black_queens:, black_kings:, side_to_move:, castling_rights:, en_passant:, halfmove_clock: 0)
       # initialize bitboards + metadata
       @white_pawns = white_pawns
       @white_knights = white_knights

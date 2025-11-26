@@ -12,6 +12,7 @@ module Chess
       board.remove_piece(color, piece, from)
 
       # Captures
+      captured_piece = nil
       if move.capture?
         captured_piece = board.piece_at(to)
         board.remove_piece(board.opp(color), captured_piece, to)
@@ -48,6 +49,46 @@ module Chess
         board.halfmove_clock = 0
       else
         board.halfmove_clock = (board.halfmove_clock || 0) + 1
+      end
+
+      # Update castling rights: if king or rook moved, or rook captured, clear the relevant rights.
+      # Bits: white kingside 0b0001, white queenside 0b0010, black kingside 0b0100, black queenside 0b1000
+      if piece == :king
+        if color == WHITE
+          board.castling_rights &= ~0b0011
+        else
+          board.castling_rights &= ~0b1100
+        end
+      end
+
+      if piece == :rook
+        case from
+        when 0
+          # white rook from a1: remove white queenside
+          board.castling_rights &= ~0b0010
+        when 7
+          # white rook from h1: remove white kingside
+          board.castling_rights &= ~0b0001
+        when 56
+          # black rook from a8: remove black queenside
+          board.castling_rights &= ~0b1000
+        when 63
+          # black rook from h8: remove black kingside
+          board.castling_rights &= ~0b0100
+        end
+      end
+
+      if move.capture? && captured_piece == :rook
+        case to
+        when 0
+          board.castling_rights &= ~0b0010
+        when 7
+          board.castling_rights &= ~0b0001
+        when 56
+          board.castling_rights &= ~0b1000
+        when 63
+          board.castling_rights &= ~0b0100
+        end
       end
 
       # Only the immediate opponent move can capture en-passant; clear the en_passant
