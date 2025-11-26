@@ -14,7 +14,7 @@ module Chess
         pawn: "♟", knight: "♞", bishop: "♝", rook: "♜", queen: "♛", king: "♚"
       }
 
-      def initialize(game, square_size: DEFAULT_SQUARE)
+      def initialize(game, square_size: DEFAULT_SQUARE, debug: false)
         @game = game
         @board = game.board
         @square = square_size
@@ -22,6 +22,8 @@ module Chess
         @highlights = []
         @rects = {}
         @piece_texts = {}
+        @debug = debug
+        @debug_text = nil
         @labels = []
         @board_x = LABEL_MARGIN
         @board_y = 0
@@ -92,15 +94,32 @@ module Chess
         if @game.checkmate?
           winner = @board.side_to_move == Chess::WHITE ? 'Black' : 'White'
           msg = "Checkmate! #{winner} wins"
+        elsif @game.stalemate?
+          msg = "Stalemate — Draw"
+        elsif @game.fifty_move_draw?
+          msg = "Draw by 50-move rule"
         else
           side = @board.side_to_move == Chess::WHITE ? 'White' : 'Black'
           in_check = @board.in_check?(@board.side_to_move) ? ' (in check)' : ''
           msg = "#{side} to move#{in_check}"
         end
         @status_text = Text.new(msg, x: 10, y: @square * 8 + LABEL_MARGIN + 8, size: 16, color: 'white')
+        # Debug overlay showing legal move count and stalemate/fifty-move status
+        if @debug
+          @debug_text&.remove
+          stalemate = @game.stalemate?
+          fifty = @game.fifty_move_draw?
+          dx = @board_x + @square * 8 - 360
+          dy = @square * 8 + LABEL_MARGIN + 8
+          dbg = "fifty_move=#{fifty} halfmove_counter = #{@board.halfmove_clock}"
+          @debug_text = Text.new(dbg, x: dx, y: dy, size: 14, color: 'yellow')
+        end
       end
 
       def handle_click(x, y)
+  # If game is over, ignore clicks on the board (prevents moves after checkmate/stalemate/draw)
+        return if @game.over?
+
         # click in status area or outside board horizontally
         return if y > @board_y + @square * 8
         return if x < @board_x || x > (@board_x + @square * 8)
