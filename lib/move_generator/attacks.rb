@@ -65,9 +65,13 @@ module Chess
       end
 
       def self.pawn_attacks_square?(board, square, by_color)
-        pawn_attacks = by_color == WHITE ? LookupTables::WHITE_PAWN_ATTACKS[square] : LookupTables::BLACK_PAWN_ATTACKS[square]
+        # Check whether any pawn of color `by_color` attacks `square`.
         pawn_bb = by_color == WHITE ? board.white_pawns : board.black_pawns
-        (pawn_attacks & pawn_bb) != 0
+        Bitboard.each_bit(pawn_bb) do |from|
+          attacks = by_color == WHITE ? LookupTables::WHITE_PAWN_ATTACKS[from] : LookupTables::BLACK_PAWN_ATTACKS[from]
+          return true if (attacks & (1 << square)) != 0
+        end
+        false
       end
 
 
