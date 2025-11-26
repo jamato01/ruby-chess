@@ -24,17 +24,22 @@ module Chess
         board.add_piece(color, piece, to)
       end
 
-      # Special moves
-      case move.flags
-      when DOUBLE_PAWN
+      # Special moves (use bitmasks since flags may be combined)
+      if (move.flags & DOUBLE_PAWN) != 0
         # set en_passant target square on board
         board.en_passant = pawn_en_passant_target(color, from, to)
-      when EN_PASSANT
+      end
+
+      if (move.flags & EN_PASSANT) != 0
         captured = en_passant_capture_square(color, to)
         board.remove_piece(board.opp(color), :pawn, captured)
-      when CASTLE_KINGSIDE
+      end
+
+      if (move.flags & CASTLE_KINGSIDE) != 0
         move_rook_for_ks_castling(board, color)
-      when CASTLE_QUEENSIDE
+      end
+
+      if (move.flags & CASTLE_QUEENSIDE) != 0
         move_rook_for_qs_castling(board, color)
       end
 
