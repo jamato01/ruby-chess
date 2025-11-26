@@ -18,5 +18,13 @@ module Chess
     def fifty_move_draw?
       (@board.halfmove_clock || 0) >= 100
     end
+
+    # Checkmate: side to move is in check and has no legal moves
+    def checkmate?
+      color = @board.side_to_move
+      return false unless @board.in_check?(color)
+      moves = MoveGenerator::Legal.generate(@board)
+      moves.empty?
+    end
   end
 end

@@ -81,9 +81,15 @@ module Chess
 
       def draw_status
         @status_text&.remove
-        side = @board.side_to_move == Chess::WHITE ? 'White' : 'Black'
-        in_check = @board.in_check?(@board.side_to_move) ? ' (in check)' : ''
-        @status_text = Text.new("#{side} to move#{in_check}", x: 10, y: @square * 8 + 8, size: 16, color: 'white')
+        if @game.checkmate?
+          winner = @board.side_to_move == Chess::WHITE ? 'Black' : 'White'
+          msg = "Checkmate! #{winner} wins"
+        else
+          side = @board.side_to_move == Chess::WHITE ? 'White' : 'Black'
+          in_check = @board.in_check?(@board.side_to_move) ? ' (in check)' : ''
+          msg = "#{side} to move#{in_check}"
+        end
+        @status_text = Text.new(msg, x: 10, y: @square * 8 + 8, size: 16, color: 'white')
       end
 
       def handle_click(x, y)
