@@ -4,7 +4,9 @@ require_relative '../lib/gui/ruby2d_renderer'
 
 begin
   game = Chess::Game.new
-  renderer = Chess::GUI::Ruby2DRenderer.new(game)
+  # enable debug overlay when CHESS_DEBUG=1
+  debug_mode = ENV['CHESS_DEBUG'] == '1'
+  renderer = Chess::GUI::Ruby2DRenderer.new(game, debug: debug_mode)
   renderer.start
 rescue Exception => e
   warn "Failed to start GUI: #{e.message}"
