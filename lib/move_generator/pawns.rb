@@ -27,7 +27,7 @@ module Chess
         end
 
         # Double push (only possible from rank 2)
-        double = ((pawns && 0x000000000000FF00) << 16) & empty & (empty << 8)
+        double = ((pawns & 0x000000000000FF00) << 16) & empty & (empty << 8)
 
         Bitboard.each_bit(double) do |to|
           from = to - 16
@@ -83,7 +83,7 @@ module Chess
         end
 
         # Double push (only possible from rank 2)
-        double = ((pawns && 0x00FF000000000000) >> 16) & empty & (empty >> 8)
+        double = ((pawns & 0x00FF000000000000) >> 16) & empty & (empty >> 8)
 
         Bitboard.each_bit(double) do |to|
           from = to + 16
