@@ -159,6 +159,26 @@ module Chess
       )
     end
 
+    def position_key
+      parts = []
+      parts << @white_pawns.to_s
+      parts << @white_knights.to_s
+      parts << @white_bishops.to_s
+      parts << @white_rooks.to_s
+      parts << @white_queens.to_s
+      parts << @white_kings.to_s
+      parts << @black_pawns.to_s
+      parts << @black_knights.to_s
+      parts << @black_bishops.to_s
+      parts << @black_rooks.to_s
+      parts << @black_queens.to_s
+      parts << @black_kings.to_s
+      parts << @side_to_move.to_s
+      parts << @castling_rights.to_s
+      parts << (@en_passant.nil? ? '-' : @en_passant.to_s)
+      parts.join('|')
+    end
+
     def in_check?(color)
       king_bb = (color == WHITE ? white_kings : black_kings)
       king_sq = Math.log2(king_bb).to_i

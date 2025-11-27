@@ -5,11 +5,17 @@ module Chess
     def initialize(board = Board.start_position)
       @board = board
       @history = []
+      # position_counts maps Board#position_key => occurrences
+      @position_counts = Hash.new(0)
+      # record starting position
+      @position_counts[@board.position_key] += 1
     end
 
     def make_move(move)
       @history << @board.clone
       @board = MoveApplier.apply(@board, move)
+      # update repetition counts for new position
+      @position_counts[@board.position_key] += 1
     end
 
     # Return true if the 50-move rule draw condition is met.
@@ -35,14 +41,23 @@ module Chess
       moves.empty?
     end
 
+    def threefold_repetition?
+      @position_counts[@board.position_key] >= 3
+    end
+
+    # Expose current position repetition count for debug/UI
+    def position_count
+      @position_counts[@board.position_key]
+    end
+
     # Game over if checkmate, stalemate, or fifty-move draw
     def over?
-      checkmate? || stalemate? || fifty_move_draw?
+      checkmate? || stalemate? || fifty_move_draw? || threefold_repetition?
     end
 
     # Returns winner color (WHITE/BLACK) if checkmate, nil for stalemate or draw
     def winner
-      return nil if stalemate? || fifty_move_draw?
+      return nil if stalemate? || fifty_move_draw? || threefold_repetition?
       return (@board.side_to_move == WHITE ? BLACK : WHITE) if checkmate?
       nil
     end
