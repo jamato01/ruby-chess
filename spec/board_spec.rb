@@ -26,6 +26,26 @@ describe Chess::Board do
     end
   end
 
+  describe 'position_key and equality' do
+    it 'considers a clone equal and shares the same position_key' do
+      board = Chess::Board.start_position
+      clone = board.clone
+      expect(board == clone).to be true
+      expect(board.position_key).to eq(clone.position_key)
+    end
+
+    it 'position_key ignores halfmove_clock while == compares it' do
+      board = Chess::Board.start_position
+      clone = board.clone
+      # change halfmove clock on clone
+      clone.halfmove_clock = clone.halfmove_clock + 1
+      # equality should differ because == includes halfmove_clock
+      expect(board == clone).to be false
+      # position_key should remain the same (halfmove excluded)
+      expect(board.position_key).to eq(clone.position_key)
+    end
+  end
+
   describe '#add_piece and #remove_piece' do
     it 'can add and remove a piece' do
       board = Chess::Board.start_position
