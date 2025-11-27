@@ -4,7 +4,6 @@ require_relative "game"
 require_relative "move"
 require_relative "bitboard"
 require_relative "move_applier"
-require_relative "square"
 
 require_relative "move_generator/attacks"
 require_relative "move_generator/base"
