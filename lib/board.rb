@@ -159,6 +159,27 @@ module Chess
       )
     end
 
+    def ==(other)
+      return false unless other.is_a?(Board)
+      return false unless @side_to_move == other.side_to_move
+      return false unless @castling_rights == other.castling_rights
+      return false unless @en_passant == other.en_passant
+      return false unless @halfmove_clock == other.halfmove_clock
+
+      @white_pawns == other.white_pawns &&
+        @white_knights == other.white_knights &&
+        @white_bishops == other.white_bishops &&
+        @white_rooks == other.white_rooks &&
+        @white_queens == other.white_queens &&
+        @white_kings == other.white_kings &&
+        @black_pawns == other.black_pawns &&
+        @black_knights == other.black_knights &&
+        @black_bishops == other.black_bishops &&
+        @black_rooks == other.black_rooks &&
+        @black_queens == other.black_queens &&
+        @black_kings == other.black_kings
+    end
+
     def position_key
       parts = []
       parts << @white_pawns.to_s
