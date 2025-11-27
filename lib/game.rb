@@ -1,6 +1,8 @@
 module Chess
   class Game
-    attr_reader :board, :history
+  attr_reader :board, :history
+  attr_reader :forced_result
+  attr_accessor :saved_path
 
     def initialize(board = Board.start_position)
       @board = board
@@ -9,6 +11,8 @@ module Chess
       @position_counts = Hash.new(0)
       # record starting position
       @position_counts[@board.position_key] += 1
+      # forced_result: nil or { type: :resign|:draw, winner: color_or_nil }
+      @forced_result = nil
     end
 
     def make_move(move)
@@ -16,6 +20,40 @@ module Chess
       @board = MoveApplier.apply(@board, move)
       # update repetition counts for new position
       @position_counts[@board.position_key] += 1
+    end
+
+    # Save / load helpers
+    def save(path)
+      dir = File.dirname(path)
+      Dir.mkdir(dir) unless Dir.exist?(dir)
+      File.binwrite(path, Marshal.dump(self))
+      # remember the saved path on this game instance so UI can clean it up later
+      @saved_path = path
+      path
+    end
+
+    def self.load(path)
+      g = Marshal.load(File.binread(path))
+      # make loaded game aware of the file it was loaded from
+      if g.respond_to?(:saved_path=)
+        g.saved_path = path
+      else
+        g.instance_variable_set(:@saved_path, path)
+      end
+      g
+    end
+
+    # Forceful actions
+    def resign(color)
+      @forced_result = { type: :resign, winner: opp_color(color) }
+    end
+
+    def force_draw
+      @forced_result = { type: :draw, winner: nil }
+    end
+
+    def opp_color(color)
+      color == WHITE ? BLACK : WHITE
     end
 
     # Return true if the 50-move rule draw condition is met.
@@ -50,13 +88,19 @@ module Chess
       @position_counts[@board.position_key]
     end
 
-    # Game over if checkmate, stalemate, or fifty-move draw
+    # Game over if checkmate, stalemate, fifty-move draw, threefold repetition or forced results
     def over?
+      return true if @forced_result
       checkmate? || stalemate? || fifty_move_draw? || threefold_repetition?
     end
 
-    # Returns winner color (WHITE/BLACK) if checkmate, nil for stalemate or draw
+    # Returns winner color (WHITE/BLACK) if checkmate or forced resignation,
+    # nil for stalemate or draw or forced draw
     def winner
+      if @forced_result
+        return @forced_result[:winner]
+      end
+
       return nil if stalemate? || fifty_move_draw? || threefold_repetition?
       return (@board.side_to_move == WHITE ? BLACK : WHITE) if checkmate?
       nil
