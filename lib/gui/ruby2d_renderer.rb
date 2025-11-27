@@ -5,6 +5,7 @@ module Chess
     class Ruby2DRenderer
       DEFAULT_SQUARE = 64
       LABEL_MARGIN = 28
+      BOTTOM_MARGIN = 64
 
       WHITE_PIECES = {
         pawn: "♙", knight: "♘", bishop: "♗", rook: "♖", queen: "♕", king: "♔"
@@ -25,6 +26,9 @@ module Chess
         @debug = debug
         @debug_text = nil
         @labels = []
+        @controls = []
+        @promotion_choices = nil
+        @promotion_ui = []
         @board_x = LABEL_MARGIN
         @board_y = 0
       end
@@ -32,7 +36,7 @@ module Chess
       def start
         raise "ruby2d gem not available. Please install 'ruby2d' to run GUI." unless defined?(Ruby2D)
 
-        Window.set(title: "Ruby Chess", width: @square * 8 + @board_x + 8, height: @square * 8 + LABEL_MARGIN + 40)
+        Window.set(title: "Ruby Chess", width: @square * 8 + @board_x + 8, height: @square * 8 + LABEL_MARGIN + BOTTOM_MARGIN + 16)
 
         draw_board
         draw_pieces
@@ -91,38 +95,179 @@ module Chess
 
       def draw_status
         @status_text&.remove
-        if @game.checkmate?
+        if @game.forced_result
+          fr = @game.forced_result
+          if fr[:type] == :resign
+            winner = fr[:winner] == Chess::WHITE ? 'White' : 'Black'
+            msg = "Resignation — #{winner} wins"
+          else
+            msg = "Draw by agreement"
+          end
+        elsif @game.checkmate?
           winner = @board.side_to_move == Chess::WHITE ? 'Black' : 'White'
           msg = "Checkmate! #{winner} wins"
         elsif @game.stalemate?
           msg = "Stalemate — Draw"
         elsif @game.fifty_move_draw?
           msg = "Draw by 50-move rule"
+        elsif @game.threefold_repetition?
+          msg = "Draw by threefold repetition"
         else
           side = @board.side_to_move == Chess::WHITE ? 'White' : 'Black'
           in_check = @board.in_check?(@board.side_to_move) ? ' (in check)' : ''
           msg = "#{side} to move#{in_check}"
         end
-        @status_text = Text.new(msg, x: 10, y: @square * 8 + LABEL_MARGIN + 8, size: 16, color: 'white')
+        # place the to-move / status message above the control area
+        status_y = @square * 8 + LABEL_MARGIN + 8
+        @status_text = Text.new(msg, x: 10, y: status_y, size: 16, color: 'white')
+        # If the game is over and a save file was associated with this game, delete it
+        if @game.over? && @game.saved_path
+          path = @game.saved_path
+          begin
+            if File.exist?(path)
+              File.delete(path)
+              msg2 = " (deleted save #{File.basename(path)})"
+            else
+              msg2 = " (save not found: #{File.basename(path)})"
+            end
+          rescue => e
+            msg2 = " (failed to delete save: #{e.message})"
+          end
+          # clear saved_path so we don't attempt again
+          @game.saved_path = nil if @game.respond_to?(:saved_path=)
+          # refresh status text to include deletion result
+          @status_text.remove
+          @status_text = Text.new(msg + msg2, x: 10, y: @square * 8 + LABEL_MARGIN + 8, size: 16, color: 'white')
+        end
+        draw_controls
         # Debug overlay showing legal move count and stalemate/fifty-move status
         if @debug
           @debug_text&.remove
-          stalemate = @game.stalemate?
-          fifty = @game.fifty_move_draw?
-          dx = @board_x + @square * 8 - 360
-          dy = @square * 8 + LABEL_MARGIN + 8
-          dbg = "fifty_move=#{fifty} halfmove_counter = #{@board.halfmove_clock}"
-          @debug_text = Text.new(dbg, x: dx, y: dy, size: 14, color: 'yellow')
+      dx = @board_x + @square * 8 - 360
+      # put debug overlay next to the status message
+      dy = status_y
+      dbg = "position_count=#{@game.position_count} threefold=#{@game.threefold_repetition?}"
+      @debug_text = Text.new(dbg, x: dx, y: dy, size: 14, color: 'yellow')
         end
       end
 
+      def draw_controls
+        # remove existing controls
+        @controls.each do |c|
+          c[:rect]&.remove
+          c[:text]&.remove
+        end
+        @controls = []
+
+        dx = @board_x + @square * 8 - 260
+        # controls live at the very bottom area
+        controls_y = @square * 8 + LABEL_MARGIN + BOTTOM_MARGIN - 28
+        dy = controls_y
+        bw = 80
+        bh = 24
+        gap = 8
+        # Load button (loads most recent save)
+        dx0 = dx - (bw + gap)
+        rect0 = Rectangle.new(x: dx0, y: dy, width: bw, height: bh, color: [0, 0, 0, 0.7])
+        txt0 = Text.new('Load', x: dx0 + 22, y: dy + 4, size: 14, color: 'white')
+        @controls << { rect: rect0, text: txt0, action: :load }
+
+        # Save button
+        rect = Rectangle.new(x: dx, y: dy, width: bw, height: bh, color: [0, 0, 0, 0.7])
+        txt = Text.new('Save', x: dx + 20, y: dy + 4, size: 14, color: 'white')
+        @controls << { rect: rect, text: txt, action: :save }
+
+        # Resign button
+        dx2 = dx + bw + gap
+        rect2 = Rectangle.new(x: dx2, y: dy, width: bw, height: bh, color: [0.4, 0, 0, 0.8])
+        txt2 = Text.new('Resign', x: dx2 + 12, y: dy + 4, size: 14, color: 'white')
+        @controls << { rect: rect2, text: txt2, action: :resign }
+
+        # Force Draw button
+        dx3 = dx2 + bw + gap
+        rect3 = Rectangle.new(x: dx3, y: dy, width: bw, height: bh, color: [0, 0, 0.4, 0.8])
+        txt3 = Text.new('Force Draw', x: dx3 + 6, y: dy + 4, size: 14, color: 'white')
+        @controls << { rect: rect3, text: txt3, action: :force_draw }
+      end
+
       def handle_click(x, y)
-  # If game is over, ignore clicks on the board (prevents moves after checkmate/stalemate/draw)
+       # If game is over, ignore clicks on the board (prevents moves after checkmate/stalemate/draw)
         return if @game.over?
+
+        # Check controls first (they live outside the board)
+        if y > @board_y + @square * 8
+          @controls.each do |c|
+            rx = c[:rect].x
+            ry = c[:rect].y
+            rw = c[:rect].width
+            rh = c[:rect].height
+            if x >= rx && x <= (rx + rw) && y >= ry && y <= (ry + rh)
+              case c[:action]
+              when :load
+                begin
+                  files = Dir.glob('saves/*.sav')
+                  if files.empty?
+                    puts "No saves available to load"
+                  else
+                    path = files.max_by { |f| File.mtime(f) }
+                    loaded = Chess::Game.load(path)
+                    @game = loaded
+                    @board = @game.board
+                    puts "Loaded #{path}"
+                    refresh_screen
+                    return
+                  end
+                rescue => e
+                  puts "Failed to load: #{e}"
+                end
+                refresh_screen
+                return
+              when :save
+                begin
+                  Dir.mkdir('saves') unless Dir.exist?('saves')
+                  path = "saves/game_#{Time.now.strftime('%Y%m%d_%H%M%S')}.sav"
+                  @game.save(path)
+                  puts "Saved game to #{path}"
+                rescue => e
+                  puts "Failed to save: #{e}"
+                end
+                refresh_screen
+                return
+              when :resign
+                @game.resign(@board.side_to_move)
+                refresh_screen
+                return
+              when :force_draw
+                @game.force_draw
+                refresh_screen
+                return
+              end
+            end
+          end
+        end
 
         # click in status area or outside board horizontally
         return if y > @board_y + @square * 8
         return if x < @board_x || x > (@board_x + @square * 8)
+
+        # If a promotion picker is active, check its UI first
+        if @promotion_choices
+          @promotion_ui.each do |entry|
+            rx = entry[:rect].x
+            ry = entry[:rect].y
+            rw = entry[:rect].width
+            rh = entry[:rect].height
+            if x >= rx && x <= (rx + rw) && y >= ry && y <= (ry + rh)
+              move = entry[:move]
+              @game.make_move(move)
+              @board = @game.board
+              clear_selection
+              clear_promotion_ui
+              refresh_screen
+              return
+            end
+          end
+        end
 
         file = ((x - @board_x) / @square).to_i
         rank = 7 - ((y - @board_y) / @square).to_i
@@ -141,11 +286,21 @@ module Chess
           candidates = legal.select { |m| m.from == @selected && m.to == sq }
 
           if candidates.any?
-            # If promotion/captures produce multiple candidates choose queen first
+            # If multiple promotions exist for this destination, show picker
+            promo_moves = candidates.select(&:is_promotion?)
+            # Show the promotion picker whenever there is at least one promotion move
+            # (user requested explicit choice rather than auto-queen)
+            if promo_moves.any?
+              show_promotion_picker(sq, promo_moves)
+              return
+            end
+
+            # Otherwise pick default (queen preferred) and apply
             move = prefer_promotion(candidates)
             @game.make_move(move)
             @board = @game.board
             clear_selection
+            clear_promotion_ui
             refresh_screen
           else
             # Clicked elsewhere: clear or select new
@@ -157,6 +312,37 @@ module Chess
               clear_selection
             end
           end
+        end
+      end
+
+      def clear_promotion_ui
+        @promotion_ui.each do |e|
+          e[:rect]&.remove
+          e[:text]&.remove
+        end
+        @promotion_ui = []
+        @promotion_choices = nil
+      end
+
+      def show_promotion_picker(dest_sq, promo_moves)
+        clear_promotion_ui
+        @promotion_choices = { dest: dest_sq, moves: promo_moves }
+        # center the promotion picker over the board
+        w = 48
+        h = 48
+        gap = 12
+        total_w = promo_moves.size * w + (promo_moves.size - 1) * gap
+        board_total_w = @square * 8
+        start_x = @board_x + (board_total_w - total_w) / 2.0
+        center_y = @board_y + (board_total_w / 2.0)
+        y = center_y - (h / 2.0)
+
+        promo_moves.each_with_index do |m, idx|
+          rx = start_x + idx * (w + gap)
+          rect = Rectangle.new(x: rx, y: y, width: w, height: h, color: [0,0,0,0.95])
+          piece_glyph = (@board.side_to_move == WHITE ? WHITE_PIECES[m.promotion] : BLACK_PIECES[m.promotion])
+          txt = Text.new(piece_glyph, x: rx + (w * 0.18), y: y + (h * 0.05), size: 36, color: 'white')
+          @promotion_ui << { rect: rect, text: txt, move: m }
         end
       end
 
