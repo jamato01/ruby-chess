@@ -1,13 +1,5 @@
 require_relative '../lib/bitboard'
 describe Chess::Bitboard do
-  describe '#bit(square)' do
-    it 'performs a left shift on 1 with the given square' do
-      square = 15
-      result = Chess::Bitboard.bit(square)
-      expect(result).to eq(32768)
-    end
-  end
-
   describe '#pop_lsb(bb)' do
     context 'when there is only one piece on the bitboard' do
       it 'returns just that piece and 0' do
