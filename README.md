@@ -3,6 +3,7 @@ TOP's [Chess Project](https://www.theodinproject.com/lessons/ruby-ruby-final-pro
 
 
 ## Project Structure
+```bash
 `/ruby-chess`
 ├── `/bin`
 |   └── `chess_gui` - Runs the GUI for the chess game
@@ -46,7 +47,7 @@ TOP's [Chess Project](https://www.theodinproject.com/lessons/ruby-ruby-final-pro
 ├── `Gemfile.lock`
 | 
 └── `README.md`
-
+```
 ## Getting started (run locally)
 
 These instructions assume you have a recent Ruby (3.x) installed. On macOS/Linux it's recommended to use rbenv or rvm to manage Ruby versions.
@@ -92,7 +93,7 @@ The GUI provides `Resign` and `Force Draw` buttons; these immediately end the ga
 - "Failed to start GUI" or similar errors: ensure Ruby2D is installed (`bundle install`) and you have an X server available. On headless systems use `xvfb-run`.
 - If the promotion picker doesn't appear, make sure the move is actually a promotion move.
 
-## Contributing / Tests
+## Tests
 
 There are RSpec specs under `spec/`. If you want to run the tests locally add `rspec` to your Gemfile and run `bundle install` and then:
 
