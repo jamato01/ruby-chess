@@ -19,6 +19,7 @@ module Chess
           from = to - 8
 
           # Handle Promotions
+          # For white pawns, promotions occur when moving to rank 8
           if to >= 56
             add_promotions(from, to, QUIET, moves)
           else
@@ -46,6 +47,7 @@ module Chess
 
           # Handle promotions on captures
           Bitboard.each_bit(capture_attacks) do |to|
+            # For white pawns, promotions occur when moving to rank 8
             if to >= 56
               add_promotions(from, to, CAPTURE, moves)
             else
@@ -74,7 +76,8 @@ module Chess
         Bitboard.each_bit(single) do |to|
           from = to + 8
 
-          #handle promotions
+          # Handle promotions
+          # For black pawns, promotions occur when moving to rank 1
           if to < 8
             add_promotions(from, to, QUIET, moves)
           else
@@ -102,7 +105,8 @@ module Chess
 
           # Handle promotions on captures
           Bitboard.each_bit(capture_attacks) do |to|
-            if to >= 56
+            # For black pawns, promotions occur when moving to rank 1
+            if to < 8
               add_promotions(from, to, CAPTURE, moves)
             else
               moves << Move.new(from: from, to: to, flags: CAPTURE)
