@@ -10,7 +10,9 @@ module Chess
       # position_counts maps Board#position_key => occurrences
       @position_counts = Hash.new(0)
       # record starting position
-      @position_counts[@board.position_key] += 1
+      if @board.respond_to?(:position_key)
+        @position_counts[@board.position_key] += 1
+      end
       # forced_result: nil or { type: :resign|:draw, winner: color_or_nil }
       @forced_result = nil
     end
@@ -19,7 +21,9 @@ module Chess
       @history << @board.clone
       @board = MoveApplier.apply(@board, move)
       # update repetition counts for new position
-      @position_counts[@board.position_key] += 1
+      if @board.respond_to?(:position_key)
+        @position_counts[@board.position_key] += 1
+      end
     end
 
     # Save / load helpers
