@@ -65,7 +65,7 @@ module Chess
       end
 
       def self.pawn_attacks_square?(board, square, by_color)
-        # Check whether any pawn of color `by_color` attacks `square`.
+        # Check whether any pawn of color `by_color` attacks `square`
         pawn_bb = by_color == WHITE ? board.white_pawns : board.black_pawns
         Bitboard.each_bit(pawn_bb) do |from|
           attacks = by_color == WHITE ? LookupTables::WHITE_PAWN_ATTACKS[from] : LookupTables::BLACK_PAWN_ATTACKS[from]
@@ -76,27 +76,30 @@ module Chess
 
 
       def self.knight_attacks_square?(board, square, by_color)
+        # Check whether any knight of color `by_color` attacks `square`
         knight_bb = by_color == WHITE ? board.white_knights : board.black_knights
         (LookupTables::KNIGHT_ATTACKS[square] & knight_bb) != 0
       end
 
       def self.king_attacks_square?(board, square, by_color)
+        # Check whether any king of color `by_color` attacks `square`
         king_bb = by_color == WHITE ? board.white_kings : board.black_kings
         (LookupTables::KING_ATTACKS[square] & king_bb) != 0
       end
 
       def self.sliding_attacks_square?(board, square, by_color)
+        # Check whether bishop, rook, or queen pieces of color `by_color` attacks `square`
         blockers = board.all_pieces
         target_mask = 1 << square
         # Bishop and Queen check
-  bishop_like = (by_color == WHITE ? 
-          (board.white_bishops | board.white_queens) : 
-          (board.black_bishops | board.black_queens))
+        bishop_like = (by_color == WHITE ? 
+        (board.white_bishops | board.white_queens) : 
+        (board.black_bishops | board.black_queens))
 
         # Rook and Queen check
-  rook_like   = (by_color == WHITE ?
-          (board.white_rooks | board.white_queens) :
-          (board.black_rooks | board.black_queens))
+        rook_like   = (by_color == WHITE ?
+        (board.white_rooks | board.white_queens) :
+        (board.black_rooks | board.black_queens))
 
         Bitboard.each_bit(bishop_like) do |from|
           attacks = bishop_attacks(from, blockers)
